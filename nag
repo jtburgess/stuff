@@ -1,0 +1,3 @@
+setcol pink
+ssh nagios@nagios.mmu.acquiremedia.com
+setcol 0

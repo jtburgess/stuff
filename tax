@@ -1,0 +1,3 @@
+setcol 5
+ssh jburgess@taxonomy1.labs.acquiremedia.com
+setcol 0

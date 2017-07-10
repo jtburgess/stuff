@@ -1,0 +1,9 @@
+if [ $# = 1 ]
+then
+   setcol blue
+   ssh nadmin@njtest1.labs.acquiremedia.com 
+else
+   setcol aqua
+   ssh njtest1.labs.acquiremedia.com
+fi
+setcol 0

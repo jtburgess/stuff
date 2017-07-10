@@ -1,0 +1,3 @@
+setcol aqua
+ssh jburgess@mbotdev1.mmu.acquiremedia.com
+setcol 0
