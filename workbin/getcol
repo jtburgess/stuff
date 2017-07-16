@@ -1,0 +1,6 @@
+osascript -e 'tell app "Terminal"
+		get background color of front window
+	end tell'
+#osascript -e 'tell app "Terminal"
+#		get transparency of front window
+#§	end tell'

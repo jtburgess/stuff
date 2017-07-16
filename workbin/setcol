@@ -1,0 +1,45 @@
+#!/bin/bash
+case ${1-0} in
+0|white)
+	c='65535,65535,65535' # F F F
+	;;
+1|peach)
+	c='65535,57935,50535' # F E D
+	;;
+sand)
+	c='55330, 53708, 47808'
+	;;
+2)
+	c='65535,50035,50935' # F D D
+	;;
+3|pink)
+	c='65535,50035,65535' # F D F
+	;;
+4|blue)
+	c='50535, 50935, 65535' # D D F
+	;;
+5|aqua)
+	c='50035, 65535, 65535' # D F F
+	;;
+green)
+	c='50035,65535,50935' # D F D
+	;;
+6|yellow)
+	c='65535, 65535, 50035' # F F D
+	;;
+grey|gray)
+	c='50000,50000,50000' # C C C
+	;;
+7|black)
+	c='0, 0, 0' # 0 0 0
+	;;
+*)
+	echo "$0: unknown color code $1"
+	exit
+esac
+
+trans=-2000
+
+osascript -e "tell app \"Terminal\"
+		set background color of front window to {$c, $trans}
+	end tell"

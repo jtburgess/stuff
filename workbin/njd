@@ -1,0 +1,4 @@
+ setcol aqua
+ ssh njdev$1.labs.acquiremedia.com
+
+setcol 0

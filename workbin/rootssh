@@ -1,0 +1,14 @@
+case `basename $0` in
+nassh) user=nadmin ;;
+rootssh) user=root ;;
+*)
+	echo unknown command/user: $0
+	exit 1
+esac
+
+setcol pink
+host=$1
+shift
+ssh $user@$host.mmu.acquiremedia.com $*
+
+setcol 0

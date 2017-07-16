@@ -1,0 +1,3 @@
+setcol yellow
+ssh nagios@wiretap.mmu.acquiremedia.com
+setcol 0
