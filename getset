@@ -1,8 +1,0 @@
-osascript -e 'tell app "Terminal"
-		get name of "default settings"
-	end tell'
-#osascript -e 'tell app "Terminal"
-#		get transparency of front window
-#§	end tell'
-
-# "default settings" of current tab 

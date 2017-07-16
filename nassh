@@ -1,3 +1,0 @@
-setcol pink
-ssh nadmin@$1.mmu.acquiremedia.com
-setcol 0

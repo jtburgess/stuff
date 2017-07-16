@@ -1,3 +1,0 @@
-setcol blue
-ssh jburgess@pa-${1-2}.labs.acquiremedia.com
-setcol 0
