@@ -1,0 +1,9 @@
+if [ "$1" = n ]
+then
+   setcol peach
+   ssh -c arcfour128 -carcfour128 nagios@names1.mmu.acquiremedia.com
+else
+   setcol sand
+   ssh -c arcfour128 -carcfour128 names1.mmu.acquiremedia.com
+fi
+setcol 0

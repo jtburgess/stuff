@@ -1,0 +1,17 @@
+#!/bin/sh
+for d in .??* *
+do  if [ -d "$d" ]
+  then cd "$d"
+    echo ">>$d"
+    ~/rrm
+    cd ..
+    rm -r "$d"
+    if [ $? -ne 0 ]
+    then
+    	mv "$d" ../..
+    fi
+    echo "<<"
+  else
+    rm -f "$d"  || exit 1
+  fi
+done

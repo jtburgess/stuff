@@ -1,0 +1,2 @@
+defaults write "Apple Global Domain" AppleScrollBarVariant DoubleBoth
+

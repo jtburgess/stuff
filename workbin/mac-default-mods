@@ -1,0 +1,16 @@
+# sho IP address of bonjour-discovered hosts
+defaults write com.apple.ScreenSharing ShowBonjourBrowser_debug 1
+
+# additional toolbar options
+defaults write com.apple.ScreenSharing 'NSToolbar Configuration ControlToolbar' -dict-add 'TB Item Identifiers' '(Scale,Control,SHare,Curtain,Capture,FullScreen,GetClipboard,SendClipboard,Quality)'
+
+# display full unix path at top of window (instead of just the directory name)
+defaults write com.apple.finder _FXShowPosixPathInTitle -bool YES
+
+# create a recent-items stack in the dock
+defaults write com.apple.dock persistent-others -array-add '{ "tile-data" = { "list-type" = 1; }; "tile-type" = "recents-tile"; }' ; killall Dock
+
+# put a dashboard widget on the desktop
+defaults write com.apple.dashboard devmode YES ; killall Dock
+#... then IN dashboard, click a widget, begin dragging, simultaneously press F12
+
