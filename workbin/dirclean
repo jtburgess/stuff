@@ -1,0 +1,77 @@
+#!/bin/sh
+PATH=/bin:/usr/bin
+USAGE="dircmp: usage: dirclean clean-directory master-directory"
+trap "rm -f /tmp/dc$$*;exit" 1 2 3 15
+
+if [ $# != 2 ]
+then
+	echo $USAGE
+	exit 2
+fi
+D0=`pwd`
+D1="$1"
+D2="$2"
+
+if [ ! -d "$D1" ]
+then echo $D1 not a directory !
+     exit 2
+else cd "$D1" ; pwd1=`pwd` ; cd "$D0"
+fi
+if [ ! -d "$D2" ]
+then echo $D2 not a directory !
+     exit 2
+else cd "$D2" ; pwd2=`pwd`
+fi
+if [ "$pwd1" = "$pwd2" ]
+then echo "$D1 and $D2 are the same!  You don't really want to delete it!"
+     exit 3
+fi
+
+cd "$pwd1"
+find . ${FINDARGS} -print | sort > /tmp/dc$$a
+
+cd "$pwd2"
+find . ${FINDARGS} -print | sort > /tmp/dc$$b
+comm /tmp/dc$$a /tmp/dc$$b | sed -n \
+	-e "/^[^	]/w /tmp/dc$$e" \
+	-e "s/^		//w /tmp/dc$$f" \
+	-e "s/^	//w /tmp/dc$$d"
+
+cd "$D0"
+if [ -s /tmp/dc$$d ]
+then	echo "Files in $D2 only are in 2-only"
+	mv /tmp/dc$$d 2-only
+fi
+if [ -s /tmp/dc$$e ]
+then	echo "Files in $D1 only are in 1-only"
+	mv /tmp/dc$$e 1-only
+fi
+
+while read a
+do
+	if [ -d "$D1/$a" ]
+	then	: # ignore directories
+	elif [ -f "$D1/$a" ]
+	then cmp -s "$D1/$a" "$D2/$a"
+	     if [ $? = 0 ]
+	     then  echo "removing file $D1/$a"
+		   rm -f "$D1/$a"
+	     else echo "	different $a"
+	     fi
+	elif [ -c "$D1/$a" -o -b "$D1/$a" ]
+	then	dev1=`ls -l $D1/"$a" | sed 's/^.* \([0-9]*, *[0-9]*\) .*$/\1/'`
+		dev2=`ls -l $D2/"$a" | sed 's/^.* \([0-9]*, *[0-9]*\) .*$/\1/'`
+		if [ "$dev1" = "$dev2" ]
+		then echo "removing special $D1/$a"
+		     rm -f "$D1/$a"
+		else echo "	special different $a"
+		fi
+	elif [ -p "$D1/$a" ]
+	then	echo "removing fifo $D1/$a"
+		rm -f "$D1/$a"
+	else echo "	unknown type?  	$a"
+	fi
+done < /tmp/dc$$f
+
+rm -f /tmp/dc$$*
+

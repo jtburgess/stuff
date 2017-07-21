@@ -1,4 +1,9 @@
- setcol aqua
- ssh njdev$1.labs.acquiremedia.com
-
+if [ $# = 2 ]
+then
+   setcol blue
+   ssh -c arcfour128 nadmin@njdev$1.labs.acquiremedia.com
+else
+   setcol aqua
+   ssh -c arcfour128 jburgess@njdev$1.labs.acquiremedia.com
+fi
 setcol 0

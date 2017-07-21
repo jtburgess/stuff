@@ -1,3 +1,16 @@
-setcol peach
-ssh nadmin@cameo1vm.mmu.acquiremedia.com
+#!/bin/bash
+if [ $# -ne 1 ]
+then
+	echo "Usage: cam 1|2, defaulting to 1 ..."
+	set 1
+fi
+
+if [ "$1" = 2 ]
+then
+	setcol peach2
+	ssh -c arcfour128 nadmin@cameo2.mmu.acquiremedia.com
+else
+	setcol peach
+	ssh -c arcfour128 nadmin@cameo1vm.mmu.acquiremedia.com
+fi
 setcol 0

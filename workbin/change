@@ -1,0 +1,30 @@
+# /bin/sh
+if [ "$1" = "-v" ]
+then
+	b=p
+	shift
+else
+	b=
+fi
+if [ $# -lt 3 ]
+then
+	echo "usage: $0 [ -v ] from to filelist ..." >&2
+	exit 1
+fi
+from="$1"
+to="$2"
+shift
+shift
+for i
+do
+	oldmode=644
+	test ${oldmode} -lt 600 && chmod 755 "${i}"
+	if [ "${b}" = p ]
+	then
+		echo "${i}"
+	fi
+	echo "g${from}s${to}g${b}
+w" | ed - "${i}"
+	test ${oldmode} -lt 600 && chmod ${oldmode} "${i}"
+done
+exit 0

@@ -1,3 +1,9 @@
-setcol sand
-ssh jburgess@wiretap.mmu.acquiremedia.com
+if [ $# = 1 ]
+then
+   setcol pink
+   ssh -c arcfour128 -carcfour128 nagios@10.10.40.146
+else
+   setcol sand
+   ssh -c arcfour128 -carcfour128 10.10.40.146
+fi
 setcol 0

@@ -1,0 +1,123 @@
+#! /bin/sh
+
+PATH=/bin:/usr/bin
+USAGE="dircmp: usage: dircmp [-v -s -d -w n] directory directory
+	-d == show diffs
+	-v == verbose
+	-s == strict - return 99 on ANY difference
+	-q == quiet -- ONLY report differences
+	-w N == width"
+
+width=99
+strict=false
+quiet=false
+
+for i in $*
+do
+	case $i in
+	-q)	quiet=true; shift ;;
+	-d)	Dflag="yes"; shift;;
+	-v)	Sflag="yes"; shift;;
+	-s)	strict=true; shift;;
+	-w)	width=`expr $2 + 0 2>/dev/null`
+		if [ $? = 2 ]
+		then echo "dircmp: numeric argument required" >&2
+			exit 2
+		fi
+		shift 2
+		;;
+	-*)	echo unknown option: $i >&2
+		exit 3
+		;;
+	esac
+done
+D0=`pwd`
+D1="$1"
+D2="$2"
+if [ $# -ne 2 ]
+then echo "$USAGE" >&2
+     exit 1
+elif [ ! -d "$D1" ]
+then echo $D1 not a directory ! >&2
+     exit 2
+else cd "$D1" ; D1=`pwd` ; cd "$D0"
+fi
+if [ ! -d "$D2" ]
+then echo $D2 not a directory ! >&2
+     exit 2
+else cd "$D2" ; D2=`pwd`
+fi
+if [ "$D1" = "$D2" ]
+then echo "$D1 and $D2 are the same!"
+     exit 3
+fi
+
+cd "$D1"
+find -L . -print | fgrep -v '.svn' | grep -v '\.[ao]$' | sort > /tmp/dc$$a
+cd "$D2"
+find -L . -print | fgrep -v '.svn' | grep -v '\.[ao]$' | sort > /tmp/dc$$b
+comm /tmp/dc$$a /tmp/dc$$b | sed -n \
+	-e "/^		/w /tmp/dc$$c" \
+	-e "/^	[^	]/w /tmp/dc$$d" \
+	-e "/^[^	]/w /tmp/dc$$e"
+rm -f /tmp/dc$$a /tmp/dc$$b
+if [ -s /tmp/dc$$e -o -s /tmp/dc$$d ]
+then
+    if $strict && [ Sflag != "yes" ]
+    then : dont print if strict and not verbose
+    else
+	more /tmp/dc$$e /tmp/dc$$d
+    fi
+    rm -f /tmp/dc$$e /tmp/dc$$d
+    if $strict
+    then
+	echo files exist in one but not the other
+	rm /tmp/dc$$*
+	exit 99
+    fi
+fi
+
+sed -e s/..// < /tmp/dc$$c > /tmp/dc$$f
+rm -f /tmp/dc$$c
+
+cd "$D0"
+> /tmp/dc$$g
+while read a
+do
+	if [ -d "$D1/$a" ]
+	then if [ "$Sflag" = "yes" ]
+	     then echo "directory	$a"
+	     fi
+	elif [ -f "$D1/$a" ]
+	then cmp -s "$D1/$a" "$D2/$a"
+	     if [ $? = 0 ]
+	     then if [ "$Sflag" = "yes" ]
+		  then echo "same     	$a"
+		  fi
+	     else 
+		  if $strict
+		  then echo $a differs
+			rm -f /tmp/dc$$*
+			exit 99
+		  elif [ "$Dflag" = "yes" ]
+		  then echo "different	$a:" 
+		  	diff -i "$D1/$a" "$D2/$a" | pr -w ${width} -h "diff of $a in $D1 and $D2" >> /tmp/dc$$g
+		  elif [ "$Sflag" = "yes" ]
+		  then if [ "$D1/$a" -nt "$D2/$a" ]
+		  	then echo "different	$a - $D1 is newer"
+		  	else echo "different	$a - $D2 is newer" 
+		  	fi
+		  else echo "different	$a" 
+		  fi
+	     fi
+	elif [ "$Sflag" != "yes" ]
+	then echo "special  	$a"
+	fi
+done < /tmp/dc$$f
+rc=$?
+
+if [ "$Dflag" = "yes" ]
+then cat /tmp/dc$$g
+fi
+rm -f /tmp/dc$$*
+exit $rc

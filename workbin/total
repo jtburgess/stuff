@@ -1,0 +1,8 @@
+# total - add up first (or indicated) column.
+case $# in
+0)	awk '{sum += $1} END {print sum}' ;;
+1)	awk '{sum += $'$1'} END {print sum}' ;;
+*)	echo "usage: total [ column-number ] <file" >&2
+	exit
+	;;
+esac

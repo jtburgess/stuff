@@ -1,0 +1,77 @@
+PATH=/bin:/usr/bin
+CMD=`basename $0`
+USAGE="usage: $CMD clean-directory master-directory"
+trap "rm -f /usr/tmp/dc$$*;exit" 1 2 3 15
+
+if [ $# != 2 ]
+then
+	echo $USAGE
+	exit 2
+fi
+D0=`pwd`
+D1=$1
+D2=$2
+
+if [ ! -d "$D1" ]
+then echo $D1 not a directory !
+     exit 2
+else cd $D1 ; pwd1=`pwd` ; cd $D0
+fi
+if [ ! -d "$D2" ]
+then echo $D2 not a directory !
+     exit 2
+else cd $D2 ; pwd2=`pwd`
+fi
+if [ "$pwd1" = "$pwd2" ]
+then echo "$D1 and $D2 are the same!  You don't really want to delete it!"
+     exit 3
+fi
+
+cd $pwd1
+find . ${FINDARGS} -print | sort > /usr/tmp/dc$$a &
+
+cd $pwd2
+find . ${FINDARGS} -print | sort > /usr/tmp/dc$$b
+wait
+
+comm /usr/tmp/dc$$a /usr/tmp/dc$$b | sed -n \
+	-e "/^[^	]/w /usr/tmp/dc$$e" \
+	-e "s/^		//w /usr/tmp/dc$$f"
+# 	-e "s/^	//w /usr/tmp/dc$$d"
+
+# if [ -s /usr/tmp/dc$$d ]
+# then	echo "Files in $D2 only are in 2-only"
+# 	mv /usr/tmp/dc$$d 2-only
+# fi
+if [ -s /usr/tmp/dc$$e ]
+then	echo "moving unique files in $D1 to $D2"
+	cd $pwd1
+	cpio -pmdlv  $pwd2 < /usr/tmp/dc$$e
+	xargs rm -f < /usr/tmp/dc$$e 2>/dev/null
+fi
+
+cd $D0
+while read a
+do
+	if [ -d $D1/"$a" ]
+	then	: # ignore directories
+	elif [ -f $D1/"$a" ]
+	then
+	    if cmp $D1/$a $D2/$a
+	    then echo "$a's are identical"
+		rm $D1/$a
+	    elif [ $D1/$a -nt $D2/$a ]
+	    then  echo "moving NEWER $D1/$a (and keeping older)"
+		mv $D2/$a $D2/$a.OLD
+		mv $D1/$a $D2/$a
+	    else
+		rm $D1/$a
+	    fi
+	elif [ -c $D1/"$a" -o -b $D1/"$a" -o -p $D1/"$a" ]
+	then	echo "special file %D1/$a ignored and removed"
+		rm -f $D1/$a
+	else echo "unknown? $D1/$a"
+	fi
+done < /usr/tmp/dc$$f
+
+rm -f /usr/tmp/dc$$*

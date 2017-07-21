@@ -1,0 +1,17 @@
+if [ $# -lt 4 ]
+then
+	echo Usage: $0 old-prefix new-prefile file-list
+	exit 1
+fi
+
+old=$1
+shift
+new=$1
+shift
+
+for i in "$@"
+do
+	x=`echo "$i" |sed "s/$old/$new/"`
+	mv "$i" "$x"
+done
+

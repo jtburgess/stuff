@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+for f in $*
+do
+	test `grep -c '$Id' $f` -gt 0 && continue
+
+	echo $f
+	/bin/ed $f <<EOF
+1a
+# \$Id\$
+# \$URL\$
+.
+w
+q
+EOF
+done

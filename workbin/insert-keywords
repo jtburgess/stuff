@@ -1,0 +1,72 @@
+#!/bin/bash
+# set -e
+for f in $*
+do
+	echo $f
+	if [ `grep -c '$Id' $f` -gt 0 ]
+	then
+		echo "		  already has Id keyword"
+		continue
+	fi
+	
+	svn propset svn:keywords 'Id URL Revision Date' $f
+	case $f in
+	*.sh)
+		ed $f <<EOF
+1a
+# \$Id\$
+SVNREV='\$Revision\$'
+SVNURL='\$URL\$'
+SVNDATE='\$Date\$'
+. /nwsys/release/bin/ga_options.sh
+
+.
+w
+q
+EOF
+	;;
+
+	*.py)
+		if [ `grep -c 'def main' $f` -gt 0 ]
+		then AFTER='def main'
+		elif [ `grep -c '^class .*:' $f` -gt 0 ]
+		then AFTER='^class.*:'
+		else
+			echo "		No main or Class.  Add keywords manually"
+			continue
+		fi
+		ed $f <<EOF
+/$AFTER/a
+	__ID__ = '\$Id\$'
+	__URL__= '\$URL\$'
+
+.
+w
+q
+EOF
+	;;
+	*.php)
+		ed $f <<EOF
+/?>/i
+// '\$Id\$'
+// '\$URL\$'
+.
+w
+q
+EOF
+	;;
+
+	*.sql)
+		cat <<EOF >> $f
+
+# \$Id\$
+# \$URL$
+EOF
+	;;
+
+	*)
+	echo "		This only handles .sh, .php, .py and .sql for now."
+	esac
+	echo
+	sleep 1
+done

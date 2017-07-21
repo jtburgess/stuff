@@ -1,0 +1,91 @@
+#!/bin/bash
+#BASE=/home/jburgess/svn/NewAuthComponents/wsrc/Authority
+#BBASE=/home/jburgess/svn/NewAuthComponents/wsrc/bin/tools
+
+function Usage() {
+	echo "Usage: $0 [-R(ecursive)] [-c cmd-to-run ] [ directory List ]"
+	echo "\t commands are: [stat], check, jbinstall, ninstall, rpm, rpmbuild, latest, ti (Test Install in /usr/tmp/JB) "
+	exit 1
+}
+
+cmd=stat
+recursive=false
+while getopts c:R opt
+do : $opt
+  case $opt in
+  c)
+    cmd=$OPTARG
+    ;;
+  R)
+  	recursive=true
+  	;;
+  *)
+    Usage
+  esac
+done
+
+shift $(( $OPTIND-1 ))
+
+BASE=$PWD
+case $cmd in
+  check)
+    cmd='svn_port -skipauth -check'
+    ;;
+  stat)
+    cmd="svn stat | grep -E -v ' debug32$| sql$|\.out|\.log|\.bak[1-9]$' ; true"
+    ;;
+  cmp*|comp*)
+    cmd='gmake cmp2install'
+    ;;
+  jbinst*)
+    cmd='gmake install'
+    ;;
+  ninst*)
+    cmd='sudo -E -u nadmin gmake install'
+    ;;
+  it|ti) # install test // test install
+    rm -rf /usr/tmp/JB/*
+    cmd='DEST=/usr/tmp/JB gmake install'
+    ;;
+  rpm)
+    # cmd='sudo -E -u nadmin gmake rpm'
+    cmd='gmake rpm'
+    ;;
+  rpmbuild|build|RPM)
+    CPATH=`echo $BASE | sed -e 's@.*wsrc/@@'`
+    cmd='svn_mkrelease -skipauth -rpm -build -y -c $CPATH/$d'
+    ;;
+  rebuild|latest)
+    CPATH=`echo $BASE | sed -e 's@.*wsrc/@@'`
+    cmd='svn_mkrelease -skipauth -rpm -build-only LATEST -y -c $CPATH/$d'
+    ;; 
+  *)
+    ;; # run command as specified
+esac
+
+if [ $# -gt 0 ]
+then
+	dirlist="$*"
+elif $recursive
+then
+	dirlist=`find . -type d | grep -v '\(/.svn\|/debug[36][24]\|/prod[36][24]\)'`
+else
+	dirlist=`ls`
+fi
+
+# mbauth_fetch mbauth_send mbauth_update mysql_tools mbauth_nightly_base auth_tools mbauth_sqlBase  applyAcornFixes mbauth_backup mbauth_companyOverrides mbauth_dnbsql mbauth_exportEditorial mbauth_prefetch mbauth_fixAcorn mbauth_Hoovers mbauth_spotTrading mbauth_stripPRN mbauth_updateSungardTickers mbauth_xwalkSnP mbauth_xwalksql
+for d in  $dirlist
+do
+  if [ -d $BASE/$d ]
+  then
+    cd $BASE/$d || exit 1
+    test -f Makefile || continue
+    echo
+    eval echo $d: $cmd
+    eval $cmd
+    test $? = 0 || exit $?
+  else
+    echo $d - NOT a directory
+  fi
+  cd $BASE
+done

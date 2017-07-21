@@ -1,3 +1,13 @@
-setcol aqua
-ssh jburgess@mbotdev1.mmu.acquiremedia.com
+if [ "$1" = 'n' ]
+then
+   setcol blue
+   ssh -carcfour128 nadmin@mbotdev1.mmu.acquiremedia.com
+elif [ "$1" = 'r' ]
+then
+   setcol grey
+   ssh -carcfour128 root@mbotdev1.mmu.acquiremedia.com
+else
+   setcol aqua
+   ssh -carcfour128 mbotdev1.mmu.acquiremedia.com
+fi
 setcol 0

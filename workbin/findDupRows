@@ -1,0 +1,13 @@
+#!/bin/sh
+if [ $# -lt 2 -o $# -gt 4 ]
+then
+	echo "usage: $0 table field [database] [ID-field]"
+	exit 1
+fi
+
+table=$1
+field=$2
+DB=${3-authority}
+ID=${4-ID}
+
+mysql -u root -D$DB -e "select l.$ID, r.$ID, l.$field from $table as l join $table as r on l.$field = r.$field where l.$ID < r.$ID and l.$field is not NULL and l.$field != '' and l.$field != 0"

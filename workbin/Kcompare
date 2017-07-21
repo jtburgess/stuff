@@ -1,0 +1,25 @@
+#!/bin/bash
+test `basename $PWD` = KEEP || cd KEEP || exit 1
+
+for f in *
+do
+	test  `expr $f : '.*\.bak[0-9]'` -gt 0 && continue
+	test  `expr $f : '.*\.ORIG'` -gt 0 && continue
+
+	if cmp $f ../$f >/dev/null
+	then	# they are identical
+		continue
+	else
+	        echo "################"
+		echo "# $f:"
+		diff -I '$Id: ' -I '$URL: ' -I '$Revision:' -I '$Date:' -b $f ../$f
+		echo
+	fi
+done 2>&1 | more
+
+# look for (new) things missing from the KEEP Directory, of suffixes I care about
+cd ..
+all=`echo *.sh *.php *.pl *.py *.sql *.conf`
+cd KEEP
+echo Missing from KEEP:
+ls $all 2>&1 | sed -n -e 's/cannot access //' -e 's/ls: \([^*]*\.[a-z]*\): No such.*/\1/p'

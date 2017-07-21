@@ -9,6 +9,6 @@ esac
 setcol pink
 host=$1
 shift
-ssh $user@$host.mmu.acquiremedia.com $*
+ssh -c arcfour128 $user@$host.mmu.acquiremedia.com $*
 
 setcol 0
