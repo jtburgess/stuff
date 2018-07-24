@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	FILE	*fp;
 	int	c;
 
-	for( i = 0; clist[i] != 0; i++ )
+	for( i = 0; (int)clist[i] != 0; i++ )
 		for( j = 0; (c = clist[i][j]); j++ )
 			isgraphic[c] = c;
 
